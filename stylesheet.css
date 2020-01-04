@@ -1,4 +1,7 @@
-html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif;}
+html,body,h1,h2,h3,h4,h5,h6 {
+    font-family: "Roboto", sans-serif;
+
+}
 
 .w3-sidebar {
     z-index: 3;
@@ -8,12 +11,69 @@ html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif;}
     height: inherit;
 }
 
-/* fix footer somehow.. 
-footer {
-    position: fixed;
-    bottom: 0px;
-    left: 0px;
-    right: 0px;
-    margin-bottom: 0px;
+#saveBtn {
+    position: relative;
+    padding: 2%;
+    margin: 10%;
+    float: inherit;
+    width: 80%;
+    max-height: inherit;
 }
-*/
+
+.error { 
+    color: #B71C1C; 
+}
+
+#userActions {
+    margin: auto;
+    padding: 20%;
+	text-align: center;
+	color: #37474F;
+	background-color: #FFFFFF;
+	border: dashed 2px #565656;
+    border-radius: 7px;
+}
+
+#userActions.hover
+{
+	color: teal;
+	border-color: teal;
+	border-style: solid;
+	box-shadow: inset 0 3px 4px #888;
+}
+
+#userActions input {
+    margin: auto;
+}
+
+#imgPrime { 
+    display: none;
+}
+
+#imageCanvas { 
+    background: white;
+    display: none;
+    border: 1px solid grey;
+    padding: 1%;
+    height: inherit;
+    width: inherit;
+}
+
+footer {
+    width: 100%;
+    font-size: x-small;
+    position: fixed;
+    bottom:0;
+    display: flex;
+}
+
+footer > div {
+    flex: 1;
+    display: flex;
+    justify-content: right;
+    padding: 2em;
+    color: white;
+}
+
+
+
