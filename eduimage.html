@@ -28,7 +28,7 @@
       <i class="fa fa-remove"></i>
   </a>
   <h4 class="w3-bar-item"><b>Tools</b></h4>
-  <a class="w3-bar-item w3-button w3-hover-black" href="#">RGB-Splitter</a>
+  <a id="w3-bar-rgb" class="w3-bar-item w3-button w3-hover-black" href="#">RGB-Splitter</a>
   <a class="w3-bar-item w3-button w3-hover-black" href="#">Monochrome</a>
   <a class="w3-bar-item w3-button w3-hover-black" href="#">Negative</a>
   <a class="w3-bar-item w3-button w3-hover-black" href="#">Black & White</a>
@@ -46,7 +46,9 @@
       <div class="w3-twothird w3-container">
         <h1 class="w3-text-teal">Modify Image</h1>
         <input type="file" id="imageLoader" name="imageLoader"/>
-        <canvas id="imageCanvas"></canvas>
+        <canvas id="imageCanvas" width="900" height="500">
+          Apparently your browser does not support canvas, so you cannozt use this tool.
+        </canvas>
     </div>
     <div class="w3-third w3-container">
         <h1 class="w3-text-teal">Information</h1>
