@@ -63,17 +63,17 @@ footer {
     width: 100%;
     font-size: x-small;
     position: fixed;
-    bottom:0;
-    display: flex;
+    bottom:0;/* 
+    display: flex; */
 }
 
-footer > div {
+/* footer > div {
     flex: 1;
     display: flex;
     justify-content: right;
     padding: 2em;
     color: white;
-}
+} */
 
 
 
