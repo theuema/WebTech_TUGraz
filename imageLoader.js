@@ -106,7 +106,7 @@
     var is_rgb_split = false;
     var rPosX, rPosY, gPosX, gPosY, bPosX, bPosY;
 
-    //negative
+    //greyscale
     var greyButton = $id('w3-bar-grey');
     greyButton.addEventListener('click', greyscale, false);
     var is_grey = false;
@@ -114,6 +114,12 @@
     //negative
     var negButton = $id('w3-bar-neg');
     negButton.addEventListener('click', negative, false);
+    var is_negative = false;
+
+    //black & white
+    var bwButton = $id('w3-bar-bw');
+    bwButton.addEventListener('click', blackWhite, false);
+    var is_bw = false;
 
     //alpha slider
     var alphaSlider = $id('alpha-slider');
@@ -158,6 +164,25 @@
         }
     }
 
+    function restoreColor() {
+        var pix = imgd.data;
+        for (var i = 0, n = pix.length; i < n; i += 1) {
+            pix[i] = original[i];
+        }
+        if(is_grey) {
+            is_grey = false;
+            greyscale();
+        }
+        if(is_negative) {
+            is_negative = false;
+            negative();
+        }
+        if(is_bw) {
+            is_bw = false;
+            blackWhite();
+        }
+    }
+
     function splitRGB() {
         if(is_rgb_split) {
             is_rgb_split = false;
@@ -194,10 +219,7 @@
         if(is_grey) {
             is_grey = false;
 
-            var pix = imgd.data;
-            for (var i = 0, n = pix.length; i < n; i += 1) {
-                pix[i] = original[i];
-            }
+            restoreColor();
         }
         else {
             is_grey = true;
@@ -216,12 +238,42 @@
     }
 
     function negative() {
+        is_negative = !is_negative;
         var pix = imgd.data;
         for (var i = 0, n = pix.length; i < n; i += 4) {
             //This would be something that could be done by workers
             pix[i] = 255 - pix[i];
             pix[i+1] = 255 - pix[i+1];
             pix[i+2] = 255 - pix[i+2];
+        }
+        redraw();
+    }
+
+    function blackWhite() {
+        if(is_bw) {
+            is_bw = false;
+
+            restoreColor();
+        }
+        else {
+            is_bw = true;
+
+            var pix = imgd.data;
+            for (var i = 0, n = pix.length; i < n; i += 4) {
+                //This would be something that could be done by workers
+                //standard formula for grexscale
+                var grey = 0.299 * pix[i] + 0.587 * pix[i+1] + 0.114 * pix[i+2];
+                //convert to black & white only
+                if(grey > 127) {
+                    grey = 255;
+                }
+                else {
+                    grey = 0;
+                }
+                pix[i] = grey;
+                pix[i+1] = grey;
+                pix[i+2] = grey;
+            }
         }
         redraw();
     }
