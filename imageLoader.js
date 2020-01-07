@@ -94,9 +94,11 @@
     var context = canvas.getContext('2d');
 
 
-    //variables for cancas operations
+    //variables for canvas operations
     var imageSize = 200;
-    var imgWidth, imgHeight, xPos = 350, yPos = 150;
+    var imgWidth, imgHeight;
+    var xPos = (canvas.width - imageSize) / 2;
+    var yPos = (canvas.height - imageSize) / 2;
 
     //rgb splitting
     var rgbSplitButton = $id('w3-bar-rgb');
@@ -108,6 +110,9 @@
     var alphaSlider = $id('alpha-slider');
     alphaSlider.addEventListener('change', changeAlphaValue, false);
     var alphaLabel = $id('alpha-label');
+
+    //for moving
+    var imgdAll, imgdR, imgdG, imgdB;
 
 
     function setupCanvas(e) {
@@ -134,6 +139,8 @@
             }
             context.drawImage(img,xPos,yPos,imgWidth,imgHeight);
 
+            imgdAll = context.getImageData(xPos, yPos, imgWidth, imgHeight);
+
             /*context.drawImage(img, 0, 0, img.width, img.height,     // source rectangle
                 0, 0, canvas.width, canvas.height); // destination rectangle*/
 
@@ -142,21 +149,20 @@
 
     function splitRGB() {
         if(is_rgb_split) {
-            is_rgb_split = false
+            is_rgb_split = false;
 
-            var imgd = context.getImageData(rPosX, rPosY, imgWidth, imgHeight);
-            var pix = imgd.data;
+            var pix = imgdR.data;
             let red_image = [...pix];
 
-            var imgd = context.getImageData(gPosX, gPosY, imgWidth, imgHeight);
-            var pix = imgd.data;
+            pix = imgdG.data;
             let green_image = [...pix];
 
-            var imgd = context.getImageData(bPosX, bPosY, imgWidth, imgHeight);
-            var pix = imgd.data;
+            pix = imgdB.data;
             let blue_image = [...pix];
 
             context.clearRect(0, 0, canvas.width, canvas.height);
+
+            pix = imgdAll.data;
 
             for (var i = 0, n = pix.length; i < n; i += 4) {
                 //This would be something that could be done by workers
@@ -166,19 +172,22 @@
                 pix[i+3] = parseFloat(alphaSlider.value) * 255;
             }
 
-            context.putImageData(imgd, xPos, yPos);
+            context.putImageData(imgdAll, xPos, yPos);
         }
         else {
-            is_rgb_split = true
-            var imgd = context.getImageData(xPos, yPos, imgWidth, imgHeight);
-                            
-            var pix = imgd.data;
+            is_rgb_split = true;
+
+            imgdR = context.getImageData(xPos, yPos, imgWidth, imgHeight);
+            imgdG = context.getImageData(xPos, yPos, imgWidth, imgHeight);
+            imgdB = context.getImageData(xPos, yPos, imgWidth, imgHeight);
 
             context.clearRect(0, 0, canvas.width, canvas.height);
 
+            var pix = imgdAll.data;
             let original = [...pix];
 
             //red
+            pix = imgdR.data;
             for (var i = 0, n = pix.length; i < n; i += 4) {
                 //This would be something that could be done by workers
                 pix[i] = original[i];
@@ -187,9 +196,10 @@
             }
             rPosX = xPos;
             rPosY = yPos+imgHeight/2;
-            context.putImageData(imgd, rPosX, rPosY);
+            context.putImageData(imgdR, rPosX, rPosY);
 
             //green
+            var pix = imgdG.data;
             for (var i = 0, n = pix.length; i < n; i += 4) {
                 //This would be something that could be done by workers
                 pix[i] = 0;
@@ -198,8 +208,10 @@
             }
             gPosX = xPos-imgWidth/2;
             gPosY = yPos-imgHeight/2;
-            context.putImageData(imgd, gPosX, gPosY);
+            context.putImageData(imgdG, gPosX, gPosY);
 
+            //blue
+            var pix = imgdB.data;
             for (var i = 0, n = pix.length; i < n; i += 4) {
                 //This would be something that could be done by workers
                 pix[i] = 0;
@@ -208,9 +220,108 @@
             }
             bPosX = xPos+imgWidth/2;
             bPosY = yPos-imgHeight/2
-            context.putImageData(imgd, bPosX, bPosY);
+            context.putImageData(imgdB, bPosX, bPosY);
         }
     }    
+
+    /**
+     * Moving operations 
+     * (view-source:http://kti.tugraz.at/staff/vsabol/courses/mmis1/examples/canvas/11.html)
+     */
+    canvas.addEventListener( 'mousemove', onMouseMoveOnCanvas, false );
+    canvas.addEventListener( 'mousedown', onMouseDownOnCanvas, false );
+    canvas.addEventListener( 'mouseup', onMouseUpOnCanvas, false );
+
+    var mouse_down = false;
+    var x0 = -1;
+    var y0 = -1;
+    var move_col = '';
+
+    function onMouseDownOnCanvas(evt) {         
+        mouse_down = true;
+    }
+    
+    function onMouseUpOnCanvas(evt) {
+        mouse_down = false;
+        x0 = -1;
+        y0 = -1;
+    }
+
+    function onMouseMoveOnCanvas(evt) {         
+        if (mouse_down) {
+            var rect = canvas.getBoundingClientRect();
+            xEvt = evt.clientX - rect.left;
+            yEvt = evt.clientY - rect.top;
+            if(is_rgb_split) {
+                if((x0 == -1) || (y0 == -1)) {
+                    if((xEvt > rPosX) && (xEvt < (rPosX + imgWidth)) && (yEvt > rPosY) && (yEvt < (rPosY + imgHeight))) {
+                        x0 = xEvt;
+                        y0 = yEvt;
+                        move_col = 'r'
+                    }
+                    else if((xEvt > gPosX) && (xEvt < (gPosX + imgWidth)) && (yEvt > gPosY) && (yEvt < (gPosY + imgHeight))) {
+                        x0 = xEvt;
+                        y0 = yEvt;
+                        move_col = 'g'
+                    }
+                    else if((xEvt > bPosX) && (xEvt < (bPosX + imgWidth)) && (yEvt > bPosY) && (yEvt < (bPosY + imgHeight))) {
+                        x0 = xEvt;
+                        y0 = yEvt;
+                        move_col = 'b'
+                    }
+                    else {
+                        return;
+                    }
+                }
+                var dx = xEvt - x0;
+                x0 = xEvt;
+                var dy = yEvt - y0;
+                y0 = yEvt;
+
+                if(move_col == 'r') {
+                    rPosX += dx;
+                    rPosY += dy;
+                }
+                if(move_col == 'g') {
+                    gPosX += dx;
+                    gPosY += dy;
+                }
+                if(move_col == 'b') {
+                    bPosX += dx;
+                    bPosY += dy;
+                }
+            }
+            else {
+                if((x0 == -1) || (y0 == -1)) {
+                    if((xEvt > xPos) && (xEvt < (xPos + imgWidth)) && (yEvt > yPos) && (yEvt < (yPos + imgHeight))) {
+                        x0 = xEvt;
+                        y0 = yEvt;
+                    } else {
+                        return;
+                    }
+                }
+                var dx = xEvt - x0;
+                x0 = xEvt;
+                xPos += dx;                    
+                var dy = yEvt - y0;
+                y0 = yEvt;
+                yPos += dy;
+            }
+            redraw();
+        }
+    }
+
+    function redraw() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        if(is_rgb_split) {
+            context.putImageData(imgdR, rPosX, rPosY);
+            context.putImageData(imgdG, gPosX, gPosY);
+            context.putImageData(imgdB, bPosX, bPosY);
+        } else {
+            context.putImageData(imgdAll, xPos, yPos);
+        }
+    }
+
 
     /**
      * Drawing operations
@@ -274,41 +385,37 @@
 
         if(is_rgb_split) {
             //red
-            var imgd = context.getImageData(rPosX, rPosY, imgWidth, imgHeight);
-            var pix = imgd.data;
+            var pix = imgdR.data;
             // This would be something that could be done by workers
             for (var i = 0, n = pix.length; i < n; i += 4) {
                 pix[i+3] = alpha;
             }
-            context.putImageData(imgd,rPosX,rPosY);
+            context.putImageData(imgdR,rPosX,rPosY);
 
             //green
-            imgd = context.getImageData(gPosX, gPosY, imgWidth, imgHeight);
-            pix = imgd.data;
+            pix = imgdG.data;
             // This would be something that could be done by workers
             for (var i = 0, n = pix.length; i < n; i += 4) {
                 pix[i+3] = alpha;
             }
-            context.putImageData(imgd,gPosX,gPosY);
+            context.putImageData(imgdG,gPosX,gPosY);
 
             //blue
-            imgd = context.getImageData(bPosX, bPosY, imgWidth, imgHeight);
-            pix = imgd.data;
+            pix = imgdB.data;
             // This would be something that could be done by workers
             for (var i = 0, n = pix.length; i < n; i += 4) {
                 pix[i+3] = alpha;
             }
-            context.putImageData(imgd,bPosX,bPosY);
+            context.putImageData(imgdB,bPosX,bPosY);
         }
         else {
-            var imgd = context.getImageData(xPos, yPos, imgWidth, imgHeight);
-            var pix = imgd.data;
+            var pix = imgdAll.data;
             // This would be something that could be done by workers
             for (var i = 0, n = pix.length; i < n; i += 4) {
                 pix[i+3] = alpha;
             }
             context.clearRect(0, 0, canvas.width, canvas.height);
-            context.putImageData(imgd,xPos,yPos);
+            context.putImageData(imgdAll,xPos,yPos);
         }
     }
 
