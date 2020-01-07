@@ -169,14 +169,11 @@
                 pix[i] = red_image[i];
                 pix[i+1] = green_image[i+1];
                 pix[i+2] = blue_image[i+2];
-                pix[i+3] = parseFloat(alphaSlider.value) * 255;
             }
 
             //move image to the red image
             xPos = rPosX;
-            yPos = rPosY;
-
-            context.putImageData(imgdAll, xPos, yPos);
+            yPos = rPosY-imgHeight / 2;
         }
         else {
             is_rgb_split = true;
@@ -200,7 +197,6 @@
             }
             rPosX = xPos;
             rPosY = yPos+imgHeight/2;
-            context.putImageData(imgdR, rPosX, rPosY);
 
             //green
             var pix = imgdG.data;
@@ -212,7 +208,6 @@
             }
             gPosX = xPos-imgWidth/2;
             gPosY = yPos-imgHeight/2;
-            context.putImageData(imgdG, gPosX, gPosY);
 
             //blue
             var pix = imgdB.data;
@@ -224,8 +219,8 @@
             }
             bPosX = xPos+imgWidth/2;
             bPosY = yPos-imgHeight/2
-            context.putImageData(imgdB, bPosX, bPosY);
         }
+        redraw();
     }    
 
     /**
@@ -315,79 +310,6 @@
         }
     }
 
-    function redraw() {
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        if(is_rgb_split) {
-            //red
-            context.putImageData(imgdR, rPosX, rPosY);
-
-            //green
-            var temp_imgd = context.getImageData(gPosX, gPosY, imgWidth, imgHeight);
-            var pix = temp_imgd.data;
-            for (var i = 0, n = pix.length; i < n; i += 4) {
-                //This would be something that could be done by workers
-                pix[i+1] = imgdG.data[i+1]
-                pix[i+3] = parseFloat(alphaSlider.value) * 255;
-            }
-            context.putImageData(temp_imgd, gPosX, gPosY);
-
-            //blue
-            temp_imgd = context.getImageData(bPosX, bPosY, imgWidth, imgHeight);
-            pix = temp_imgd.data;
-            for (var i = 0, n = pix.length; i < n; i += 4) {
-                //This would be something that could be done by workers
-                pix[i+2] = imgdB.data[i+2]
-                pix[i+3] = parseFloat(alphaSlider.value) * 255;
-            }
-            context.putImageData(temp_imgd, bPosX, bPosY);
-        } else {
-            context.putImageData(imgdAll, xPos, yPos);
-        }
-    }
-
-
-    /**
-     * Drawing operations
-     */
-    //Listeners for mouse movement
-    /*document.addEventListener('mousemove', draw);
-    document.addEventListener('mousedown', setPosition);
-    document.addEventListener('mouseup', releaseMouse);
-    
-    var pos = { x: 0, y: 0 };
-    brushColor = "rgb(0, 0, 0)";
-
-    // new position for mouse events, not working
-    function setPosition(e) {
-        //pos.x = e.clientX;
-        //pos.y = e.clientY;
-        context.beginPath();
-    }
-
-    function draw(e) {
-        // mouse left button must be pressed
-        if (e.buttons !== 1) return;
-
-        //context.beginPath(); // begin
-        context.lineWidth = 5;
-        context.lineCap = 'round';
-        context.strokeStyle = brushColor;
-        //context.moveTo(e.layerX, e.layerY); // from
-        //setPosition(e);
-        //context.lineTo(pos.x, pos.y); // to
-        context.lineTo(e.layerX, e.layerY);
-        context.stroke();
-    }
-
-    function releaseMouse(e) {
-        //set different color
-        var colors = context.getImageData(e.layerX, e.layerY, 1, 1).data;
-        brushColor = "rgb(" + colors[0] + ", " + colors[1] + ", " + colors[2] + ")";
-    }*/
-
-    //TODO: add more operations
-
-
     /**
      * Save the canvas image
      */
@@ -404,43 +326,51 @@
     function changeAlphaValue() {
         // https://stackoverflow.com/questions/36038679/html-canvas-inaccurately-sets-pixel-color-when-alpha-is-lower-than-one
         alphaLabel.innerText = alphaSlider.value;
-        var alpha = parseFloat(alphaSlider.value) * 255;
+        redraw();
+    }
 
+    function redraw() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
         if(is_rgb_split) {
             //red
-            var pix = imgdR.data;
-            // This would be something that could be done by workers
+            var temp_imgd = context.getImageData(rPosX, rPosY, imgWidth, imgHeight);
+            var pix = temp_imgd.data;
             for (var i = 0, n = pix.length; i < n; i += 4) {
-                pix[i+3] = alpha;
+                //This would be something that could be done by workers
+                pix[i] = imgdR.data[i]
+                pix[i+3] = parseFloat(alphaSlider.value) * imgdAll.data[i+3];
             }
-            context.putImageData(imgdR,rPosX,rPosY);
+            context.putImageData(temp_imgd, rPosX, rPosY);
 
             //green
-            pix = imgdG.data;
-            // This would be something that could be done by workers
+            temp_imgd = context.getImageData(gPosX, gPosY, imgWidth, imgHeight);
+            pix = temp_imgd.data;
             for (var i = 0, n = pix.length; i < n; i += 4) {
-                pix[i+3] = alpha;
+                //This would be something that could be done by workers
+                pix[i+1] = imgdG.data[i+1]
+                pix[i+3] = parseFloat(alphaSlider.value) * imgdAll.data[i+3];
             }
-            context.putImageData(imgdG,gPosX,gPosY);
+            context.putImageData(temp_imgd, gPosX, gPosY);
 
             //blue
-            pix = imgdB.data;
-            // This would be something that could be done by workers
+            temp_imgd = context.getImageData(bPosX, bPosY, imgWidth, imgHeight);
+            pix = temp_imgd.data;
             for (var i = 0, n = pix.length; i < n; i += 4) {
-                pix[i+3] = alpha;
+                //This would be something that could be done by workers
+                pix[i+2] = imgdB.data[i+2]
+                pix[i+3] = parseFloat(alphaSlider.value) * imgdAll.data[i+3];
             }
-            context.putImageData(imgdB,bPosX,bPosY);
-        }
-        else {
-            var pix = imgdAll.data;
-            // This would be something that could be done by workers
+            context.putImageData(temp_imgd, bPosX, bPosY);
+        } else {
+            context.putImageData(imgdAll, xPos, yPos);
+            var temp_imgd = context.getImageData(xPos, yPos, imgWidth, imgHeight);
+            var pix = temp_imgd.data;
             for (var i = 0, n = pix.length; i < n; i += 4) {
-                pix[i+3] = alpha;
+                //This would be something that could be done by workers
+                pix[i+3] = parseFloat(alphaSlider.value) * imgdAll.data[i+3];
             }
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            context.putImageData(imgdAll,xPos,yPos);
+            context.putImageData(temp_imgd, xPos, yPos);
         }
-        redraw();
     }
 
 })();
