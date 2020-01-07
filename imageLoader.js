@@ -172,6 +172,10 @@
                 pix[i+3] = parseFloat(alphaSlider.value) * 255;
             }
 
+            //move image to the red image
+            xPos = rPosX;
+            yPos = rPosY;
+
             context.putImageData(imgdAll, xPos, yPos);
         }
         else {
@@ -314,9 +318,28 @@
     function redraw() {
         context.clearRect(0, 0, canvas.width, canvas.height);
         if(is_rgb_split) {
+            //red
             context.putImageData(imgdR, rPosX, rPosY);
-            context.putImageData(imgdG, gPosX, gPosY);
-            context.putImageData(imgdB, bPosX, bPosY);
+
+            //green
+            var temp_imgd = context.getImageData(gPosX, gPosY, imgWidth, imgHeight);
+            var pix = temp_imgd.data;
+            for (var i = 0, n = pix.length; i < n; i += 4) {
+                //This would be something that could be done by workers
+                pix[i+1] = imgdG.data[i+1]
+                pix[i+3] = parseFloat(alphaSlider.value) * 255;
+            }
+            context.putImageData(temp_imgd, gPosX, gPosY);
+
+            //blue
+            temp_imgd = context.getImageData(bPosX, bPosY, imgWidth, imgHeight);
+            pix = temp_imgd.data;
+            for (var i = 0, n = pix.length; i < n; i += 4) {
+                //This would be something that could be done by workers
+                pix[i+2] = imgdB.data[i+2]
+                pix[i+3] = parseFloat(alphaSlider.value) * 255;
+            }
+            context.putImageData(temp_imgd, bPosX, bPosY);
         } else {
             context.putImageData(imgdAll, xPos, yPos);
         }
