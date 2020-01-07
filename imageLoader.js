@@ -141,46 +141,75 @@
     }
 
     function splitRGB() {
-        is_rgb_split = true
-        var imgd = context.getImageData(xPos, yPos, imgWidth, imgHeight);
-                        
-        var pix = imgd.data;
+        if(is_rgb_split) {
+            is_rgb_split = false
 
-        context.clearRect(0, 0, canvas.width, canvas.height);
+            var imgd = context.getImageData(rPosX, rPosY, imgWidth, imgHeight);
+            var pix = imgd.data;
+            let red_image = [...pix];
 
-        let original = [...pix];
+            var imgd = context.getImageData(gPosX, gPosY, imgWidth, imgHeight);
+            var pix = imgd.data;
+            let green_image = [...pix];
 
-        //red
-        for (var i = 0, n = pix.length; i < n; i += 4) {
-            //This would be something that could be done by workers
-            pix[i] = original[i];
-            pix[i+1] = 0;
-            pix[i+2] = 0;
+            var imgd = context.getImageData(bPosX, bPosY, imgWidth, imgHeight);
+            var pix = imgd.data;
+            let blue_image = [...pix];
+
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (var i = 0, n = pix.length; i < n; i += 4) {
+                //This would be something that could be done by workers
+                pix[i] = red_image[i];
+                pix[i+1] = green_image[i+1];
+                pix[i+2] = blue_image[i+2];
+                pix[i+3] = parseFloat(alphaSlider.value) * 255;
+            }
+
+            context.putImageData(imgd, xPos, yPos);
         }
-        rPosX = xPos;
-        rPosY = yPos+imgHeight/2;
-        context.putImageData(imgd, rPosX, rPosY);
+        else {
+            is_rgb_split = true
+            var imgd = context.getImageData(xPos, yPos, imgWidth, imgHeight);
+                            
+            var pix = imgd.data;
 
-        //green
-        for (var i = 0, n = pix.length; i < n; i += 4) {
-            //This would be something that could be done by workers
-            pix[i] = 0;
-            pix[i+1] = original[i+1];
-            pix[i+2] = 0;
-        }
-        gPosX = xPos-imgWidth/2;
-        gPosY = yPos-imgHeight/2;
-        context.putImageData(imgd, gPosX, gPosY);
+            context.clearRect(0, 0, canvas.width, canvas.height);
 
-        for (var i = 0, n = pix.length; i < n; i += 4) {
-            //This would be something that could be done by workers
-            pix[i] = 0;
-            pix[i+1] = 0;
-            pix[i+2] = original[i+2];
+            let original = [...pix];
+
+            //red
+            for (var i = 0, n = pix.length; i < n; i += 4) {
+                //This would be something that could be done by workers
+                pix[i] = original[i];
+                pix[i+1] = 0;
+                pix[i+2] = 0;
+            }
+            rPosX = xPos;
+            rPosY = yPos+imgHeight/2;
+            context.putImageData(imgd, rPosX, rPosY);
+
+            //green
+            for (var i = 0, n = pix.length; i < n; i += 4) {
+                //This would be something that could be done by workers
+                pix[i] = 0;
+                pix[i+1] = original[i+1];
+                pix[i+2] = 0;
+            }
+            gPosX = xPos-imgWidth/2;
+            gPosY = yPos-imgHeight/2;
+            context.putImageData(imgd, gPosX, gPosY);
+
+            for (var i = 0, n = pix.length; i < n; i += 4) {
+                //This would be something that could be done by workers
+                pix[i] = 0;
+                pix[i+1] = 0;
+                pix[i+2] = original[i+2];
+            }
+            bPosX = xPos+imgWidth/2;
+            bPosY = yPos-imgHeight/2
+            context.putImageData(imgd, bPosX, bPosY);
         }
-        bPosX = xPos+imgWidth/2;
-        bPosY = yPos-imgHeight/2
-        context.putImageData(imgd, bPosX, bPosY);
     }    
 
     /**
@@ -278,6 +307,7 @@
             for (var i = 0, n = pix.length; i < n; i += 4) {
                 pix[i+3] = alpha;
             }
+            context.clearRect(0, 0, canvas.width, canvas.height);
             context.putImageData(imgd,xPos,yPos);
         }
     }
