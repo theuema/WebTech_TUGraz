@@ -107,6 +107,11 @@
     var rPosX, rPosY, gPosX, gPosY, bPosX, bPosY;
 
     //negative
+    var greyButton = $id('w3-bar-grey');
+    greyButton.addEventListener('click', greyscale, false);
+    var is_grey = false;
+
+    //negative
     var negButton = $id('w3-bar-neg');
     negButton.addEventListener('click', negative, false);
 
@@ -115,9 +120,9 @@
     alphaSlider.addEventListener('change', changeAlphaValue, false);
     var alphaLabel = $id('alpha-label');
 
-    //for moving
-    var imgdAll, imgdR, imgdG, imgdB;
-
+    //overall
+    var imgd;
+    var original;
 
     function setupCanvas(e) {
         var img = new Image()
@@ -143,7 +148,9 @@
             }
             context.drawImage(img,xPos,yPos,imgWidth,imgHeight);
 
-            imgdAll = context.getImageData(xPos, yPos, imgWidth, imgHeight);
+            imgd = context.getImageData(xPos, yPos, imgWidth, imgHeight);
+
+            original = [...imgd.data]
 
             /*context.drawImage(img, 0, 0, img.width, img.height,     // source rectangle
                 0, 0, canvas.width, canvas.height); // destination rectangle*/
@@ -155,25 +162,7 @@
         if(is_rgb_split) {
             is_rgb_split = false;
 
-            var pix = imgdR.data;
-            let red_image = [...pix];
-
-            pix = imgdG.data;
-            let green_image = [...pix];
-
-            pix = imgdB.data;
-            let blue_image = [...pix];
-
             context.clearRect(0, 0, canvas.width, canvas.height);
-
-            pix = imgdAll.data;
-
-            for (var i = 0, n = pix.length; i < n; i += 4) {
-                //This would be something that could be done by workers
-                pix[i] = red_image[i];
-                pix[i+1] = green_image[i+1];
-                pix[i+2] = blue_image[i+2];
-            }
 
             //move image to the red image
             xPos = rPosX;
@@ -182,82 +171,57 @@
         else {
             is_rgb_split = true;
 
-            imgdR = context.getImageData(xPos, yPos, imgWidth, imgHeight);
-            imgdG = context.getImageData(xPos, yPos, imgWidth, imgHeight);
-            imgdB = context.getImageData(xPos, yPos, imgWidth, imgHeight);
-
             context.clearRect(0, 0, canvas.width, canvas.height);
 
-            var pix = imgdAll.data;
-            let original = [...pix];
+            var pix = imgd.data;
 
             //red
-            pix = imgdR.data;
-            for (var i = 0, n = pix.length; i < n; i += 4) {
-                //This would be something that could be done by workers
-                pix[i] = original[i];
-                pix[i+1] = 0;
-                pix[i+2] = 0;
-            }
             rPosX = xPos;
             rPosY = yPos+imgHeight/2;
 
             //green
-            var pix = imgdG.data;
-            for (var i = 0, n = pix.length; i < n; i += 4) {
-                //This would be something that could be done by workers
-                pix[i] = 0;
-                pix[i+1] = original[i+1];
-                pix[i+2] = 0;
-            }
             gPosX = xPos-imgWidth/2;
             gPosY = yPos-imgHeight/2;
 
             //blue
-            var pix = imgdB.data;
-            for (var i = 0, n = pix.length; i < n; i += 4) {
-                //This would be something that could be done by workers
-                pix[i] = 0;
-                pix[i+1] = 0;
-                pix[i+2] = original[i+2];
-            }
             bPosX = xPos+imgWidth/2;
             bPosY = yPos-imgHeight/2
         }
         redraw();
     }
 
-    function negative() {
-        if(is_rgb_split) {
-            //red
-            var pix = imgdR.data;
-            for (var i = 0, n = pix.length; i < n; i += 4) {
-                //This would be something that could be done by workers
-                pix[i] = 255 - pix[i];
-            }
+    function greyscale() {
+        if(is_grey) {
+            is_grey = false;
 
-            //green
-            var pix = imgdG.data;
-            for (var i = 0, n = pix.length; i < n; i += 4) {
-                //This would be something that could be done by workers
-                pix[i+1] = 255 - pix[i+1];
-            }
-
-            //blue
-            var pix = imgdB.data;
-            for (var i = 0, n = pix.length; i < n; i += 4) {
-                //This would be something that could be done by workers
-                pix[i+2] = 255 - pix[i+2];
+            var pix = imgd.data;
+            for (var i = 0, n = pix.length; i < n; i += 1) {
+                pix[i] = original[i];
             }
         }
         else {
-            var pix = imgdAll.data;
+            is_grey = true;
+
+            var pix = imgd.data;
             for (var i = 0, n = pix.length; i < n; i += 4) {
                 //This would be something that could be done by workers
-                pix[i] = 255 - pix[i];
-                pix[i+1] = 255 - pix[i+1];
-                pix[i+2] = 255 - pix[i+2];
+                //standard formula for grexscale
+                var grey = 0.299 * pix[i] + 0.587 * pix[i+1] + 0.114 * pix[i+2];
+                pix[i] = grey;
+                pix[i+1] = grey;
+                pix[i+2] = grey;
             }
+        }
+        redraw();
+    }
+
+    function negative() {
+        var pix = imgd.data;
+        for (var i = 0, n = pix.length; i < n; i += 4) {
+            //This would be something that could be done by workers
+            pix[i] = 255 - pix[i];
+            pix[i+1] = 255 - pix[i+1];
+            pix[i+2] = 255 - pix[i+2];
         }
         redraw();
     }
@@ -376,8 +340,8 @@
             var pix = temp_imgd.data;
             for (var i = 0, n = pix.length; i < n; i += 4) {
                 //This would be something that could be done by workers
-                pix[i] = imgdR.data[i]
-                pix[i+3] = parseFloat(alphaSlider.value) * imgdAll.data[i+3];
+                pix[i] = imgd.data[i]
+                pix[i+3] = parseFloat(alphaSlider.value) * imgd.data[i+3];
             }
             context.putImageData(temp_imgd, rPosX, rPosY);
 
@@ -386,8 +350,8 @@
             pix = temp_imgd.data;
             for (var i = 0, n = pix.length; i < n; i += 4) {
                 //This would be something that could be done by workers
-                pix[i+1] = imgdG.data[i+1]
-                pix[i+3] = parseFloat(alphaSlider.value) * imgdAll.data[i+3];
+                pix[i+1] = imgd.data[i+1]
+                pix[i+3] = parseFloat(alphaSlider.value) * imgd.data[i+3];
             }
             context.putImageData(temp_imgd, gPosX, gPosY);
 
@@ -396,17 +360,17 @@
             pix = temp_imgd.data;
             for (var i = 0, n = pix.length; i < n; i += 4) {
                 //This would be something that could be done by workers
-                pix[i+2] = imgdB.data[i+2]
-                pix[i+3] = parseFloat(alphaSlider.value) * imgdAll.data[i+3];
+                pix[i+2] = imgd.data[i+2]
+                pix[i+3] = parseFloat(alphaSlider.value) * imgd.data[i+3];
             }
             context.putImageData(temp_imgd, bPosX, bPosY);
         } else {
-            context.putImageData(imgdAll, xPos, yPos);
+            context.putImageData(imgd, xPos, yPos);
             var temp_imgd = context.getImageData(xPos, yPos, imgWidth, imgHeight);
             var pix = temp_imgd.data;
             for (var i = 0, n = pix.length; i < n; i += 4) {
                 //This would be something that could be done by workers
-                pix[i+3] = parseFloat(alphaSlider.value) * imgdAll.data[i+3];
+                pix[i+3] = parseFloat(alphaSlider.value) * imgd.data[i+3];
             }
             context.putImageData(temp_imgd, xPos, yPos);
         }
