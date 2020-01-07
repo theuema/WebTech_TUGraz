@@ -106,6 +106,10 @@
     var is_rgb_split = false;
     var rPosX, rPosY, gPosX, gPosY, bPosX, bPosY;
 
+    //negative
+    var negButton = $id('w3-bar-neg');
+    negButton.addEventListener('click', negative, false);
+
     //alpha slider
     var alphaSlider = $id('alpha-slider');
     alphaSlider.addEventListener('change', changeAlphaValue, false);
@@ -221,7 +225,42 @@
             bPosY = yPos-imgHeight/2
         }
         redraw();
-    }    
+    }
+
+    function negative() {
+        if(is_rgb_split) {
+            //red
+            var pix = imgdR.data;
+            for (var i = 0, n = pix.length; i < n; i += 4) {
+                //This would be something that could be done by workers
+                pix[i] = 255 - pix[i];
+            }
+
+            //green
+            var pix = imgdG.data;
+            for (var i = 0, n = pix.length; i < n; i += 4) {
+                //This would be something that could be done by workers
+                pix[i+1] = 255 - pix[i+1];
+            }
+
+            //blue
+            var pix = imgdB.data;
+            for (var i = 0, n = pix.length; i < n; i += 4) {
+                //This would be something that could be done by workers
+                pix[i+2] = 255 - pix[i+2];
+            }
+        }
+        else {
+            var pix = imgdAll.data;
+            for (var i = 0, n = pix.length; i < n; i += 4) {
+                //This would be something that could be done by workers
+                pix[i] = 255 - pix[i];
+                pix[i+1] = 255 - pix[i+1];
+                pix[i+2] = 255 - pix[i+2];
+            }
+        }
+        redraw();
+    }
 
     /**
      * Moving operations 
