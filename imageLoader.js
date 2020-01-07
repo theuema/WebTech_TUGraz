@@ -1,22 +1,118 @@
-var imageSize = 200;
-var imageLoader = document.getElementById('imageLoader');
-imageLoader.addEventListener('change', handleImage, false);
-var canvas = document.getElementById('imageCanvas');
-var ctx = canvas.getContext('2d');
 
-var rgbSplitButton = document.getElementById('w3-bar-rgb');
-rgbSplitButton.addEventListener('click', splitRGB, false);
-var imgWidth, imgHeight, xPos = 350, yPos = 150;
+(function () {
 
-function handleImage(e){
-    var reader = new FileReader();
-    reader.onload = function(event){
-        var img = new Image();
-        img.onload = function(){
-            /*canvas.width = img.width;
-            canvas.height = img.height;
-            ctx.drawImage(img,0,0);*/
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // getElementById
+    function $id(id) {
+        return document.getElementById(id);
+    }
+
+    // file drag hover
+    function userActionsHover(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        e.target.className = (e.type == "dragover" ? "hover" : "");
+    }
+
+    // file selection
+    function ImageLoaderHandler(e) {
+        // cancel event and hover styling
+        userActionsHover(e);
+
+        //target.files = imageLoader; dataTransfer.files = DnD
+        var files = e.target.files || e.dataTransfer.files;
+
+        for (var i = 0, f; f = files[i]; i++) {
+            ParseFile(f);
+        }
+    }
+
+    // output file information
+    function ParseFile(file) {
+
+        // display image
+        if (file.type.indexOf("image") == 0) {
+            var reader = new FileReader();
+            reader.readAsDataURL(file);
+
+            //todo: open it right away on canvas??
+            reader.onload = function (e) {
+                $id("imgPrime").src = e.target.result;
+                //$id("imgPrime").style.display = 'block';
+                
+                $id("imageCanvas").style.display = 'inline';
+            }
+
+            userActions.style.display = 'none';
+        }
+    }
+
+    // initialize
+    function Init() {
+        var imageLoader = $id("imageLoader");
+        var userActions = $id("userActions");
+
+        // file select
+        imageLoader.addEventListener("change", ImageLoaderHandler, false);
+
+        // is XHR2 available?
+        var xhr = new XMLHttpRequest();
+        if (xhr.upload) {
+            // file drop
+            userActions.addEventListener("dragover", userActionsHover, false);
+            userActions.addEventListener("dragleave", userActionsHover, false);
+            userActions.addEventListener("drop", ImageLoaderHandler, false);
+            userActions.style.display = "block";
+
+        }
+
+    }
+
+    // call initialization file
+    if (window.File && window.FileList && window.FileReader) {
+        Init();
+    }
+    else {
+        //error, Browser does not support FileReader
+        //TODO check with a browser if this is correct, otherwise delete
+        var p = document.createElement('p'),
+            msg = document.createTextNode('Sorry, your browser does not support FileReader.');
+        p.className = 'error';
+        p.appendChild(msg);
+        $id('userActions').innerHTML = '';
+        $id('userActions').appendChild(p);
+    }
+
+
+    /**
+     * Canvas Operations
+     */
+
+    //set up canvas
+    var canvasLoader = $id('imgPrime');
+    canvasLoader.addEventListener('load', setupCanvas);
+
+    var canvas = $id('imageCanvas');
+    var context = canvas.getContext('2d');
+
+    var imageSize = 200;
+
+    var rgbSplitButton = document.getElementById('w3-bar-rgb');
+    rgbSplitButton.addEventListener('click', splitRGB, false);
+    var imgWidth, imgHeight, xPos = 350, yPos = 150;
+
+
+    function setupCanvas(e) {
+        var img = new Image()
+        img.src = $id('imgPrime').getAttribute('src');
+        img.onload = () => {
+            /*//fit canvas to ratio of picture
+            var hRatio = canvas.width / img.width;
+            var vRatio = canvas.height / img.height;
+            var ratio = Math.min(hRatio, vRatio);
+            context.drawImage(img, 0, 0, img.width, img.height,
+                0, 0, img.width * ratio, img.height * ratio);*/
+
+            context.clearRect(0, 0, canvas.width, canvas.height);
             var ratio = img.width / img.height;
             if(img.width > img.height) {
                 imgWidth = imageSize;
@@ -26,45 +122,103 @@ function handleImage(e){
                 imgWidth = imageSize * ratio;
                 imgHeight = imageSize;
             }
-            ctx.drawImage(img,xPos,yPos,imgWidth,imgHeight);
+            context.drawImage(img,xPos,yPos,imgWidth,imgHeight);
+
+            /*context.drawImage(img, 0, 0, img.width, img.height,     // source rectangle
+                0, 0, canvas.width, canvas.height); // destination rectangle*/
+
         }
-        img.src = event.target.result;
     }
-    reader.readAsDataURL(e.target.files[0]);     
-}
 
-function splitRGB() {
-    var imgd = ctx.getImageData(xPos, yPos, imgWidth, imgHeight);
-                    
-    var pix = imgd.data;
+    function splitRGB() {
+        var imgd = context.getImageData(xPos, yPos, imgWidth, imgHeight);
+                        
+        var pix = imgd.data;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+        context.clearRect(0, 0, canvas.width, canvas.height);
 
-    let original = [...pix];
+        let original = [...pix];
 
-    //red
-    for (var i = 0, n = pix.length; i < n; i += 4) {
-        //This would be something that could be done by workers
-        pix[i] = original[i];
-        pix[i+1] = 0;
-        pix[i+2] = 0;
+        //red
+        for (var i = 0, n = pix.length; i < n; i += 4) {
+            //This would be something that could be done by workers
+            pix[i] = original[i];
+            pix[i+1] = 0;
+            pix[i+2] = 0;
+        }
+        context.putImageData(imgd, xPos, yPos+imgHeight/2);
+
+        //green
+        for (var i = 0, n = pix.length; i < n; i += 4) {
+            //This would be something that could be done by workers
+            pix[i] = 0;
+            pix[i+1] = original[i+1];
+            pix[i+2] = 0;
+        }
+        context.putImageData(imgd, xPos-imgWidth/2, yPos-imgHeight/2);
+
+        for (var i = 0, n = pix.length; i < n; i += 4) {
+            //This would be something that could be done by workers
+            pix[i] = 0;
+            pix[i+1] = 0;
+            pix[i+2] = original[i+2];
+        }
+        context.putImageData(imgd, xPos+imgWidth/2, yPos-imgHeight/2);
+    }    
+
+    /**
+     * Drawing operations
+     */
+    //Listeners for mouse movement
+    /*document.addEventListener('mousemove', draw);
+    document.addEventListener('mousedown', setPosition);
+    document.addEventListener('mouseup', releaseMouse);
+    
+    var pos = { x: 0, y: 0 };
+    brushColor = "rgb(0, 0, 0)";
+
+    // new position for mouse events, not working
+    function setPosition(e) {
+        //pos.x = e.clientX;
+        //pos.y = e.clientY;
+        context.beginPath();
     }
-    ctx.putImageData(imgd, xPos, yPos+imgHeight/2);
 
-    //green
-    for (var i = 0, n = pix.length; i < n; i += 4) {
-        //This would be something that could be done by workers
-        pix[i] = 0;
-        pix[i+1] = original[i+1];
-        pix[i+2] = 0;
-    }
-    ctx.putImageData(imgd, xPos-imgWidth/2, yPos-imgHeight/2);
+    function draw(e) {
+        // mouse left button must be pressed
+        if (e.buttons !== 1) return;
 
-    for (var i = 0, n = pix.length; i < n; i += 4) {
-        //This would be something that could be done by workers
-        pix[i] = 0;
-        pix[i+1] = 0;
-        pix[i+2] = original[i+2];
+        //context.beginPath(); // begin
+        context.lineWidth = 5;
+        context.lineCap = 'round';
+        context.strokeStyle = brushColor;
+        //context.moveTo(e.layerX, e.layerY); // from
+        //setPosition(e);
+        //context.lineTo(pos.x, pos.y); // to
+        context.lineTo(e.layerX, e.layerY);
+        context.stroke();
     }
-    ctx.putImageData(imgd, xPos+imgWidth/2, yPos-imgHeight/2);
-}
+
+    function releaseMouse(e) {
+        //set different color
+        var colors = context.getImageData(e.layerX, e.layerY, 1, 1).data;
+        brushColor = "rgb(" + colors[0] + ", " + colors[1] + ", " + colors[2] + ")";
+    }*/
+
+    //TODO: add more operations
+
+
+    /**
+     * Save the canvas image
+     */
+    $id('saveBtn').addEventListener('click', saveImage, false);
+
+    function saveImage(e) {
+        var image = canvas.toDataURL("image/png")
+            .replace("image/png", "image/octet-stream");  
+        window.location.href = image;
+
+        e.preventDefault();   
+    }
+
+})();

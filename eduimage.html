@@ -27,12 +27,15 @@
     <a href="javascript:void(0)" onclick="toolbar_close()" class="w3-right w3-xlarge w3-padding-large w3-hover-black w3-hide-large" title="Close Menu">
       <i class="fa fa-remove"></i>
   </a>
-  <h4 class="w3-bar-item"><b>Tools</b></h4>
+
+  <h5 class="w3-bar-item"><b>Tools</b></h5>
   <a id="w3-bar-rgb" class="w3-bar-item w3-button w3-hover-black" href="#">RGB-Splitter</a>
   <a class="w3-bar-item w3-button w3-hover-black" href="#">Monochrome</a>
   <a class="w3-bar-item w3-button w3-hover-black" href="#">Negative</a>
   <a class="w3-bar-item w3-button w3-hover-black" href="#">Black & White</a>
   <a class="w3-bar-item w3-button w3-hover-black" href="#">Alpha Channel</a>
+
+  <button id="saveBtn">Save</button>
 </nav>
 
 <!-- Overlay effect when opening toolbar on small screens -->
@@ -40,31 +43,40 @@
 
 <!-- Main content --> <!-- shift it to the right by 250 pixels when the toolbar is visible -->
 <div class="w3-main" style="margin-left:250px">
+  <!-- Canvas -->
+  <div class="w3-row w3-padding-64">
 
-    <!-- Canvas -->
-    <div class="w3-row w3-padding-64">
-      <div class="w3-twothird w3-container">
-        <h1 class="w3-text-teal">Modify Image</h1>
-        <input type="file" id="imageLoader" name="imageLoader"/>
-        <canvas id="imageCanvas" width="900" height="500">
-          Apparently your browser does not support canvas, so you cannozt use this tool.
+    <div class="w3-twothird w3-container">
+      <h5 class="w3-text-teal">Modify Image</h5>
+      <div id="userActions">
+        <p>Drag &amp; drop your image here to upload or choose a file.</p>
+        <input type="file" id="imageLoader" name="imageLoader" accept="image/*"/>
+          
+      </div>
+      
+      <!-- todo replace imgPrime with imageCanvas, don't need image just on page-->
+      <img id="imgPrime" src="" alt="uploaded image placeholder"/>
+      <canvas id="imageCanvas" width="900" height="500">
+          Apparently your browser does not support canvas, so you cannot use this tool.
         </canvas>
+      <div id="messages"></div>
     </div>
-    <div class="w3-third w3-container">
-        <h1 class="w3-text-teal">Information</h1>
-        <p>Open a saved Image or drag a new Image onto the screen to start.</p>
+
+    <div id="information-box" class="w3-third w3-container">
+      <h5 class="w3-text-teal">Information</h5>
+      <p>Open a saved image or drag a new image onto the screen to start.</p>
     </div>
-</div>
+  </div>
 
-<footer id="myFooter">
-  <div class="w3-container w3-theme-l2 w3-padding-32">
-    <h4>@RESTinpeace, <a href="http://kti.tugraz.at/staff/vsabol/courses/wt/" target="_blank">WebTechnology</a> 2019</h4>
-</div>
 
-<div class="w3-container w3-theme-l1">
-    <p>Powered by HTML5 & <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a></p>
-</div>
-</footer>
+  <footer id="myFooter">
+    <div class="w3-container w3-theme-l2">
+      <p>@RESTinpeace, <a href="http://kti.tugraz.at/staff/vsabol/courses/wt/" target="_blank">WebTechnology</a> 2019/2020</p>
+    </div>
+    <div class="w3-container w3-theme-l1">
+      <p>Powered by HTML5 & <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a></p>
+    </div>
+  </footer>
 
 <!-- END MAIN -->
 </div>
@@ -72,6 +84,7 @@
 <!-- Scripts -->
 <script src="toolbar.js"></script>
 <script src="imageLoader.js"></script>
+<!-- <script src="canvas.js"></script> -->
 
 </body>
 </html>
