@@ -6,6 +6,9 @@ var ctx = canvas.getContext('2d');
 
 var rgbSplitButton = document.getElementById('w3-bar-rgb');
 rgbSplitButton.addEventListener('click', splitRGB, false);
+var alphaSlider = document.getElementById('alpha-slider');
+alphaSlider.addEventListener('change', changeAlphaValue, false);
+var alphaLabel = document.getElementById('alpha-label');
 var imgWidth, imgHeight, xPos = 350, yPos = 150;
 
 function handleImage(e){
@@ -67,4 +70,17 @@ function splitRGB() {
         pix[i+2] = original[i+2];
     }
     ctx.putImageData(imgd, xPos+imgWidth/2, yPos-imgHeight/2);
+}
+
+function changeAlphaValue() {
+    // https://stackoverflow.com/questions/36038679/html-canvas-inaccurately-sets-pixel-color-when-alpha-is-lower-than-one
+    alphaLabel.innerText = alphaSlider.value;
+    var alpha = parseFloat(alphaSlider.value) * 255;
+    var imgd = ctx.getImageData(xPos, yPos, imgWidth, imgHeight);
+    var pix = imgd.data;
+    // This would be something that could be done by workers
+    for (var i = 0, n = pix.length; i < n; i += 4) {
+        pix[i+3] = alpha;
+    }
+    ctx.putImageData(imgd,xPos,yPos);
 }
