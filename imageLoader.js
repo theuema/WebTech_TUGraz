@@ -93,12 +93,18 @@
     var canvas = $id('imageCanvas');
     var context = canvas.getContext('2d');
 
-    var imageSize = 200;
 
-    var rgbSplitButton = $id('w3-bar-rgb');
-    rgbSplitButton.addEventListener('click', splitRGB, false);
+    //variables for cancas operations
+    var imageSize = 200;
     var imgWidth, imgHeight, xPos = 350, yPos = 150;
 
+    //rgb splitting
+    var rgbSplitButton = $id('w3-bar-rgb');
+    rgbSplitButton.addEventListener('click', splitRGB, false);
+    var is_rgb_split = false;
+    var rPosX, rPosY, gPosX, gPosY, bPosX, bPosY;
+
+    //alpha slider
     var alphaSlider = $id('alpha-slider');
     alphaSlider.addEventListener('change', changeAlphaValue, false);
     var alphaLabel = $id('alpha-label');
@@ -135,6 +141,7 @@
     }
 
     function splitRGB() {
+        is_rgb_split = true
         var imgd = context.getImageData(xPos, yPos, imgWidth, imgHeight);
                         
         var pix = imgd.data;
@@ -150,7 +157,9 @@
             pix[i+1] = 0;
             pix[i+2] = 0;
         }
-        context.putImageData(imgd, xPos, yPos+imgHeight/2);
+        rPosX = xPos;
+        rPosY = yPos+imgHeight/2;
+        context.putImageData(imgd, rPosX, rPosY);
 
         //green
         for (var i = 0, n = pix.length; i < n; i += 4) {
@@ -159,7 +168,9 @@
             pix[i+1] = original[i+1];
             pix[i+2] = 0;
         }
-        context.putImageData(imgd, xPos-imgWidth/2, yPos-imgHeight/2);
+        gPosX = xPos-imgWidth/2;
+        gPosY = yPos-imgHeight/2;
+        context.putImageData(imgd, gPosX, gPosY);
 
         for (var i = 0, n = pix.length; i < n; i += 4) {
             //This would be something that could be done by workers
@@ -167,7 +178,9 @@
             pix[i+1] = 0;
             pix[i+2] = original[i+2];
         }
-        context.putImageData(imgd, xPos+imgWidth/2, yPos-imgHeight/2);
+        bPosX = xPos+imgWidth/2;
+        bPosY = yPos-imgHeight/2
+        context.putImageData(imgd, bPosX, bPosY);
     }    
 
     /**
@@ -229,13 +242,44 @@
         // https://stackoverflow.com/questions/36038679/html-canvas-inaccurately-sets-pixel-color-when-alpha-is-lower-than-one
         alphaLabel.innerText = alphaSlider.value;
         var alpha = parseFloat(alphaSlider.value) * 255;
-        var imgd = context.getImageData(xPos, yPos, imgWidth, imgHeight);
-        var pix = imgd.data;
-        // This would be something that could be done by workers
-        for (var i = 0, n = pix.length; i < n; i += 4) {
-            pix[i+3] = alpha;
+
+        if(is_rgb_split) {
+            //red
+            var imgd = context.getImageData(rPosX, rPosY, imgWidth, imgHeight);
+            var pix = imgd.data;
+            // This would be something that could be done by workers
+            for (var i = 0, n = pix.length; i < n; i += 4) {
+                pix[i+3] = alpha;
+            }
+            context.putImageData(imgd,rPosX,rPosY);
+
+            //green
+            imgd = context.getImageData(gPosX, gPosY, imgWidth, imgHeight);
+            pix = imgd.data;
+            // This would be something that could be done by workers
+            for (var i = 0, n = pix.length; i < n; i += 4) {
+                pix[i+3] = alpha;
+            }
+            context.putImageData(imgd,gPosX,gPosY);
+
+            //blue
+            imgd = context.getImageData(bPosX, bPosY, imgWidth, imgHeight);
+            pix = imgd.data;
+            // This would be something that could be done by workers
+            for (var i = 0, n = pix.length; i < n; i += 4) {
+                pix[i+3] = alpha;
+            }
+            context.putImageData(imgd,bPosX,bPosY);
         }
-        context.putImageData(imgd,xPos,yPos);
+        else {
+            var imgd = context.getImageData(xPos, yPos, imgWidth, imgHeight);
+            var pix = imgd.data;
+            // This would be something that could be done by workers
+            for (var i = 0, n = pix.length; i < n; i += 4) {
+                pix[i+3] = alpha;
+            }
+            context.putImageData(imgd,xPos,yPos);
+        }
     }
 
 })();
