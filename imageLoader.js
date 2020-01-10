@@ -231,6 +231,7 @@
                 var finished_workers = 0;
                 var pixel_len = imgWidth * imgHeight * 4;
                 var block_len = pixel_len / num_workers;
+                var splitted_height = imgHeight / num_workers;
                 var pixel = imgd.data;
 
                 for (var i = 0; i < num_workers; ++i) {
@@ -238,23 +239,28 @@
                     worker.onmessage = function(event) {
                         finished_workers++;
                         console.log("[MAIN] worker" + finished_workers + ": "+ event.data.start);
-                        var tmp_pixel = event.data.imgd.data;
-                        for (var i = event.data.start; i < event.data.end; ++i) {
-                            pixel[i] = tmp_pixel[i];
-                        }
+                        // var tmp_pixel = event.data.imgd.data;
+                        // for (var i = event.data.start; i < event.data.end; ++i) {
+                        //     pixel[i] = tmp_pixel[i];
+                        // }
+                        var index = event.data.index;
+                        context.putImageData(event.data.imgd, xPos, yPos + (index * splitted_height));
                         if (finished_workers == num_workers) {
                             console.log("[MAIN] All workers finished.");
+                            imgd = context.getImageData(xPos, yPos, imgWidth, imgHeight);
                             redraw();
                         }
                         // self.terminate();
                     };
                     var start = i * block_len;
                     var end = start + block_len;
+                    var temp_imgd = context.getImageData(xPos, yPos + (i * splitted_height), imgWidth, splitted_height);
                     worker.postMessage({
-                        'imgd': imgd,
+                        'imgd': temp_imgd,
                         'index': i,
                         'start': start,
                         'end': end,
+                        'len': block_len,
                         'cmd': 'greyscale'
                     });
                 }

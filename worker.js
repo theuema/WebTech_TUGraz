@@ -1,7 +1,8 @@
 // Inspired by: https://dzone.com/articles/using-web-workers-improve
 
-function applyGreyscale(pix, start, end) {
-    for (var i = start; i < end; i += 4) {
+function applyGreyscale(pix, len) {
+    // for (var i = start; i < end; i += 4) {
+    for (var i = 0; i < len; i += 4) {
         //standard formula for greyscale
         var grey = 0.299 * pix[i] + 0.587 * pix[i+1] + 0.114 * pix[i+2];
         pix[i] = grey;
@@ -19,7 +20,8 @@ self.addEventListener('message', function (e) {
 
     var cmd = e.data.cmd;
     if ("greyscale" === cmd) {
-        applyGreyscale(pix, start, end);
+        // applyGreyscale(pix, start, end);
+        applyGreyscale(pix, e.data.len)
     }
     else {
         console.log("[WORKER] Command '" + cmd + "' not found!")
