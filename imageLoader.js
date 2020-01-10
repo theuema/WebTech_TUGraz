@@ -130,6 +130,8 @@
     var imgd;
     var original;
 
+    var num_workers = 4;
+
     function setupCanvas(e) {
         var img = new Image()
         img.src = $id('imgPrime').getAttribute('src');
@@ -220,21 +222,47 @@
             is_grey = false;
 
             restoreColor();
+            redraw();
         }
         else {
             is_grey = true;
+            if (typeof(Worker) !== "undefined") {
+                console.log("[MAIN]: Start WebWorker");
+                var finished_workers = 0;
+                var pixel_len = imgWidth * imgHeight * 4;
+                var block_len = pixel_len / num_workers;
+                var pixel = imgd.data;
 
-            var pix = imgd.data;
-            for (var i = 0, n = pix.length; i < n; i += 4) {
-                //This would be something that could be done by workers
-                //standard formula for grexscale
-                var grey = 0.299 * pix[i] + 0.587 * pix[i+1] + 0.114 * pix[i+2];
-                pix[i] = grey;
-                pix[i+1] = grey;
-                pix[i+2] = grey;
+                for (var i = 0; i < num_workers; ++i) {
+                    var worker = new Worker('worker.js');
+                    worker.onmessage = function(event) {
+                        finished_workers++;
+                        console.log("[MAIN] worker" + finished_workers + ": "+ event.data.start);
+                        var tmp_pixel = event.data.imgd.data;
+                        for (var i = event.data.start; i < event.data.end; ++i) {
+                            pixel[i] = tmp_pixel[i];
+                        }
+                        if (finished_workers == num_workers) {
+                            console.log("[MAIN] All workers finished.");
+                            redraw();
+                        }
+                        // self.terminate();
+                    };
+                    var start = i * block_len;
+                    var end = start + block_len;
+                    worker.postMessage({
+                        'imgd': imgd,
+                        'index': i,
+                        'start': start,
+                        'end': end,
+                        'cmd': 'greyscale'
+                    });
+                }
+            }
+            else {
+                console.log("Web worker not supported :(");
             }
         }
-        redraw();
     }
 
     function negative() {
