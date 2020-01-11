@@ -62,7 +62,6 @@
             userActions.style.display = "block";
 
         }
-
     }
 
     // call initialization file
@@ -186,6 +185,7 @@
     }
 
     function splitRGB() {
+        setRGBText();
         if(is_rgb_split) {
             is_rgb_split = false;
 
@@ -218,6 +218,7 @@
     }
 
     function greyscale() {
+        setGreyscaleText();
         if(is_grey) {
             is_grey = false;
 
@@ -238,6 +239,7 @@
     }
 
     function negative() {
+        setNegativeText()
         is_negative = !is_negative;
 
         if (typeof(Worker) !== "undefined" && is_rgb_split === false) {
@@ -251,6 +253,7 @@
     }
 
     function blackWhite() {
+        setBlackWhiteText()
         if(is_bw) {
             is_bw = false;
             restoreColor();
@@ -372,6 +375,7 @@
 
     function changeAlphaValue() {
         // https://stackoverflow.com/questions/36038679/html-canvas-inaccurately-sets-pixel-color-when-alpha-is-lower-than-one
+        setAlphaText();
         alphaLabel.innerText = alphaSlider.value;
         redraw();
     }

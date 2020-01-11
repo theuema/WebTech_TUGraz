@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <!-- own css -->
 <link rel="stylesheet" href="stylesheet.css">
-<body>
+<body onload="setInitialText()">
 
   <!-- Navbar -->
   <div class="w3-top">
@@ -67,7 +67,8 @@
 
     <div id="information-box" class="w3-third w3-container">
       <h5 class="w3-text-teal">Information</h5>
-      <p>Open a saved image or drag a new image onto the screen to start.</p>
+      <h6 id="infobox-title" class="w3-text-teal">Welcome</h6>
+      <p id="infobox">Open a saved image or drag a new image onto the screen to start.</p>
     </div>
   </div>
 
@@ -86,6 +87,7 @@
 
 <!-- Scripts -->
 <script src="toolbar.js"></script>
+<script src="infobox.js"></script>
 <script src="imageOperations.js"></script>
 <script src="imageLoader.js"></script>
 <!-- <script src="canvas.js"></script> -->
