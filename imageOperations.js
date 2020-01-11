@@ -7,3 +7,11 @@ var applyGreyscale = function (pix, len) {
         pix[i+2] = grey;
     }
 };
+
+var applyNegative = function (pix, len) {
+    for (var i = 0, n = len; i < n; i += 4) {
+        pix[i] = 255 - pix[i];
+        pix[i+1] = 255 - pix[i+1];
+        pix[i+2] = 255 - pix[i+2];
+    }
+};

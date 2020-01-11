@@ -226,31 +226,7 @@
         else {
             is_grey = true;
             if (typeof(Worker) !== "undefined") {
-                console.log("[MAIN]: Start WebWorker");
-                var finished_workers = 0;
-                var pixel_len = imgWidth * imgHeight * 4;
-                var block_len = pixel_len / num_workers;
-                var splitted_height = imgHeight / num_workers;
-                var workers = []
-                for (var i = 0; i < num_workers; ++i) {
-                    var worker = new Worker('worker.js');
-                    workers.push(worker);
-                    worker.onmessage = function(event) {
-                        var index = event.data.index;
-                        context.putImageData(event.data.imgd, xPos, yPos + (index * splitted_height));
-
-                        finished_workers++;
-                        if (finished_workers === num_workers) {
-                            console.log("[MAIN] All workers finished.");
-                            imgd = context.getImageData(xPos, yPos, imgWidth, imgHeight);
-                            redraw();
-                            terminateWorkers(workers);
-                        }
-                    };
-
-                    var temp_imgd = context.getImageData(xPos, yPos + (i * splitted_height), imgWidth, splitted_height);
-                    worker.postMessage({'imgd': temp_imgd, 'index': i, 'len': block_len, 'cmd': 'greyscale'});
-                }
+                startWorkers("greyscale")
             }
             else { // Workers not supported
                 var pix = imgd.data;
@@ -262,14 +238,15 @@
 
     function negative() {
         is_negative = !is_negative;
-        var pix = imgd.data;
-        for (var i = 0, n = pix.length; i < n; i += 4) {
-            //This would be something that could be done by workers
-            pix[i] = 255 - pix[i];
-            pix[i+1] = 255 - pix[i+1];
-            pix[i+2] = 255 - pix[i+2];
+
+        if (typeof(Worker) !== "undefined") {
+            startWorkers("negative");
         }
-        redraw();
+        else { // Workers not supported
+            var pix = imgd.data;
+            applyNegative(pix, pix.length);
+            redraw();
+        }
     }
 
     function blackWhite() {
@@ -448,6 +425,33 @@
                 pix[i+3] = parseFloat(alphaSlider.value) * imgd.data[i+3];
             }
             context.putImageData(temp_imgd, xPos, yPos);
+        }
+    }
+
+    function startWorkers(command) {
+        var finished_workers = 0;
+        var pixel_len = imgWidth * imgHeight * 4;
+        var block_len = pixel_len / num_workers;
+        var splitted_height = imgHeight / num_workers;
+        var workers = [];
+        for (var i = 0; i < num_workers; ++i) {
+            var worker = new Worker('worker.js');
+            workers.push(worker);
+            worker.onmessage = function(event) {
+                var index = event.data.index;
+                context.putImageData(event.data.imgd, xPos, yPos + (index * splitted_height));
+
+                finished_workers++;
+                if (finished_workers === num_workers) {
+                    console.log("[MAIN] All workers finished.");
+                    imgd = context.getImageData(xPos, yPos, imgWidth, imgHeight);
+                    redraw();
+                    terminateWorkers(workers);
+                }
+            };
+
+            var temp_imgd = context.getImageData(xPos, yPos + (i * splitted_height), imgWidth, splitted_height);
+            worker.postMessage({'imgd': temp_imgd, 'index': i, 'len': block_len, 'cmd': command});
         }
     }
 
