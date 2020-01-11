@@ -132,7 +132,7 @@
     var num_workers = 4;
 
     function setupCanvas(e) {
-        var img = new Image()
+        var img = new Image();
         img.src = $id('imgPrime').getAttribute('src');
         img.onload = () => {
             /*//fit canvas to ratio of picture
@@ -170,6 +170,7 @@
         for (var i = 0, n = pix.length; i < n; i += 1) {
             pix[i] = original[i];
         }
+
         if(is_grey) {
             is_grey = false;
             greyscale();
@@ -225,7 +226,7 @@
         }
         else {
             is_grey = true;
-            if (typeof(Worker) !== "undefined") {
+            if (typeof(Worker) !== "undefined" && is_rgb_split === false) {
                 startWorkers("greyscale")
             }
             else { // Workers not supported
@@ -239,7 +240,7 @@
     function negative() {
         is_negative = !is_negative;
 
-        if (typeof(Worker) !== "undefined") {
+        if (typeof(Worker) !== "undefined" && is_rgb_split === false) {
             startWorkers("negative");
         }
         else { // Workers not supported
@@ -258,7 +259,7 @@
         else {
             is_bw = true;
 
-            if (typeof(Worker) !== "undefined") {
+            if (typeof(Worker) !== "undefined" && is_rgb_split === false) {
                 startWorkers("blackandwhite")
             }
             else { // Workers not supported
