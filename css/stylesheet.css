@@ -25,6 +25,11 @@ html,body,h1,h2,h3,h4,h5,h6 {
     color: #B71C1C; 
 }
 
+.info {
+    background-color: #e7f3fe;
+    border-left: 6px solid #2196F3;
+}
+
 #userActions {
     margin: auto;
     padding: 20%;

@@ -93,7 +93,7 @@
 
 
     //variables for canvas operations
-    var imageSize = 200;
+    var imageSize = 500;
     var imgWidth, imgHeight;
     var xPos = (canvas.width - imageSize) / 2;
     var yPos = (canvas.height - imageSize) / 2;
