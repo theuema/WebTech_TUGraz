@@ -26,9 +26,42 @@
 
     <div class="w3-row w3-padding-64">
       <div class="w3-twothird w3-container">
-        <h1 class="w3-text-teal">This is a documentation</h1>
+        <h1 class="w3-text-teal">Documentation of </h1>
         <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum
         dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+
+        <h1 class="w3-text-teal">HTML5 Technologies</h1>
+
+        <h2 class="w3-text-teal">Semantic Markup</h2>
+        <p>In order to structure our application we used HTML5 semantic markup. More specifically, we used the 'nav' tag for our toolbox and the 'footer' tag for some additional information.</p>
+
+        <h2 class="w3-text-teal">WebForm Components</h2>
+        <p>To allow the user to interact with the image operations we implemented WebForm components. For instance, it is possible to change the alpha value of the uploaded image via a HTML5 slider component.</p>
+
+        <h2 class="w3-text-teal">FileSystem API</h2>
+        <p>The FileSystem API enables the user to upload an image from his/her local harddrive to our application. Furthermore, after playing around with our image operations, we provide the user with a 'save' button to store the modified image persistently.</p>
+
+        <h2 class="w3-text-teal">Drag & Drop</h2>
+        <p>In addition to uploading an image via the FileSystem API we provide the user the well-known Drag & Drop functionality. Simply drag an image from your local filebrowser and drop it inside the marked spot of our application.</p>
+
+        <h2 class="w3-text-teal">Canvas Element</h2>
+        <p>The heart of our application is editing an image including an explanation of the operations. To draw the image we use the HTML5 canvas element. <br/>
+          We support the following operations:</p>
+        <ul>
+          <li>Splitting the image into its RGB channels</li>
+        <li>Convert the image into greyscale</li>
+        <li>Compute the negative of the image</li>
+        <li>Convert the image into Black & White</li>
+        <li>Manipulate the alpha value of the image</li>
+      </ul>
+
+        <h2 class="w3-text-teal">WebWorkers</h2>
+        <p>Image processing is a perfect example for 'single instruction multiple data'. We implement WebWorkers to handle the image operation in a multi-threading manner. The image data array is split into equal parts and each WebWorkers processes the data in parallel. After we receive all theresults from the WebWorkers we can redraw the canvas and show the final result</p>
+
+        <h1 class="w3-text-teal">Architecture</h1>
+        <p>tetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum
+          dolor sit amet, consectetur adipisicing</p>
+
       </div>
     </div>
 
