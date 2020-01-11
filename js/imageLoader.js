@@ -431,7 +431,7 @@
         var splitted_height = imgHeight / num_workers;
         var workers = [];
         for (var i = 0; i < num_workers; ++i) {
-            var worker = new Worker('worker.js');
+            var worker = new Worker('js/worker.js');
             workers.push(worker);
             worker.onmessage = function(event) {
                 var index = event.data.index;
