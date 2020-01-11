@@ -1,5 +1,4 @@
 (function () {
-
     // getElementById
     function $id(id) {
         return document.getElementById(id);
@@ -232,41 +231,31 @@
                 var pixel_len = imgWidth * imgHeight * 4;
                 var block_len = pixel_len / num_workers;
                 var splitted_height = imgHeight / num_workers;
-                var pixel = imgd.data;
-
+                var workers = []
                 for (var i = 0; i < num_workers; ++i) {
                     var worker = new Worker('worker.js');
+                    workers.push(worker);
                     worker.onmessage = function(event) {
-                        finished_workers++;
-                        console.log("[MAIN] worker" + finished_workers + ": "+ event.data.start);
-                        // var tmp_pixel = event.data.imgd.data;
-                        // for (var i = event.data.start; i < event.data.end; ++i) {
-                        //     pixel[i] = tmp_pixel[i];
-                        // }
                         var index = event.data.index;
                         context.putImageData(event.data.imgd, xPos, yPos + (index * splitted_height));
-                        if (finished_workers == num_workers) {
+
+                        finished_workers++;
+                        if (finished_workers === num_workers) {
                             console.log("[MAIN] All workers finished.");
                             imgd = context.getImageData(xPos, yPos, imgWidth, imgHeight);
                             redraw();
+                            terminateWorkers(workers);
                         }
-                        // self.terminate();
                     };
-                    var start = i * block_len;
-                    var end = start + block_len;
+
                     var temp_imgd = context.getImageData(xPos, yPos + (i * splitted_height), imgWidth, splitted_height);
-                    worker.postMessage({
-                        'imgd': temp_imgd,
-                        'index': i,
-                        'start': start,
-                        'end': end,
-                        'len': block_len,
-                        'cmd': 'greyscale'
-                    });
+                    worker.postMessage({'imgd': temp_imgd, 'index': i, 'len': block_len, 'cmd': 'greyscale'});
                 }
             }
-            else {
-                console.log("Web worker not supported :(");
+            else { // Workers not supported
+                var pix = imgd.data;
+                applyGreyscale(pix, pix.length);
+                redraw();
             }
         }
     }
@@ -460,6 +449,12 @@
             }
             context.putImageData(temp_imgd, xPos, yPos);
         }
+    }
+
+    function terminateWorkers(workers) {
+        workers.forEach(function (w) {
+            w.terminate();
+        })
     }
 
 })();
