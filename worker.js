@@ -9,13 +9,16 @@ self.addEventListener('message', function (e) {
     var pix_len = e.data.len;
     var cmd = e.data.cmd;
     if ("greyscale" === cmd) {
-        applyGreyscale(pix, pix_len)
+        applyGreyscale(pix, pix_len);
     }
     else if ("negative" === cmd) {
-        applyNegative(pix, pix_len)
+        applyNegative(pix, pix_len);
+    }
+    else if ("blackandwhite" === cmd) {
+        applyBlackAndWhite(pix, pix_len);
     }
     else {
-        console.log("[WORKER] Command '" + cmd + "' not found!")
+        console.log("[WORKER] Command '" + cmd + "' not found!");
     }
 
     postMessage({'imgd': imgd, 'index': e.data.index});

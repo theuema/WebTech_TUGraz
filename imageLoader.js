@@ -252,30 +252,21 @@
     function blackWhite() {
         if(is_bw) {
             is_bw = false;
-
             restoreColor();
+            redraw();
         }
         else {
             is_bw = true;
 
-            var pix = imgd.data;
-            for (var i = 0, n = pix.length; i < n; i += 4) {
-                //This would be something that could be done by workers
-                //standard formula for grexscale
-                var grey = 0.299 * pix[i] + 0.587 * pix[i+1] + 0.114 * pix[i+2];
-                //convert to black & white only
-                if(grey > 127) {
-                    grey = 255;
-                }
-                else {
-                    grey = 0;
-                }
-                pix[i] = grey;
-                pix[i+1] = grey;
-                pix[i+2] = grey;
+            if (typeof(Worker) !== "undefined") {
+                startWorkers("blackandwhite")
+            }
+            else { // Workers not supported
+                var pix = imgd.data;
+                applyGreyscale(pix, pix.length);
+                redraw();
             }
         }
-        redraw();
     }
 
     /**
