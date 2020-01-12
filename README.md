@@ -1,4 +1,10 @@
-# WebTech
+# WebTech 2019/2020
+
+RESTinpeace, Group 10:
+01430500	Camilla Reis
+01430798	Jannik Hildebrandt
+01431293	Lukas Bodner
+01430751	Mario Theuermann
 
 # Research on RGB Tool for HTML5
 https://duckduckgo.com/?q=load+image+filesystem+html5+rgb+channels&t=brave&ia=web
