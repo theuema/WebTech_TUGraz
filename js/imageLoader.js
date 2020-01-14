@@ -267,7 +267,7 @@
             }
             else { // Workers not supported
                 var pix = imgd.data;
-                applyGreyscale(pix, pix.length);
+                applyBlackAndWhite(pix, pix.length);
                 redraw();
             }
         }
